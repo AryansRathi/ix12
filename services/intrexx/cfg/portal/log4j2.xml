@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" shutdownHook="disable">
+    <Properties>
+         <Property name="de.uplanet.lucy.logPath">log</Property>
+    </Properties>
+    <Appenders>
+        <!-- Console appender configuration -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout>
+                <pattern>%-5p %d{ISO8601}{UTC}Z - %c[%t]%n %m%n</pattern>
+            </PatternLayout>
+        </Console>
+
+        <!-- File appender configuration (daily rotation) -->
+        <RollingFile name="DailyFile" fileName="${sys:de.uplanet.lucy.logPath}/portal.log" filePattern="${sys:de.uplanet.lucy.logPath}/portal.%d{yyyy-MM-dd}.log">
+            <PatternLayout>
+                <pattern>%-5p %d{ISO8601}{UTC}Z - %c[%t]%n %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+        </RollingFile>
+
+        <!-- File appender configuration  (rotation) -->
+        <!-- RollingFile name="FixedSizeFile" fileName="${sys:de.uplanet.lucy.logPath}/portal.log" filePattern="${sys:de.uplanet.lucy.logPath}/portal.log.%i">
+            <PatternLayout>
+                <pattern>%-5p %d{ISO8601}{UTC}Z - %c[%t]%n %m%n</pattern>
+            </PatternLayout>
+            <SizeBasedTriggeringPolicy size="16 MB"/>
+            <Policies>
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+            </Policies>
+            <DefaultRolloverStrategy max="128"/>
+        </RollingFile -->
+
+        <RollingFile name="WorkflowDailyFile" fileName="${sys:de.uplanet.lucy.logPath}/workflow.log" filePattern="${sys:de.uplanet.lucy.logPath}/workflow.log.%d{yyyy-MM-dd}">
+            <PatternLayout>
+                <pattern>%-5p %d{ISO8601}{UTC}Z - %c[%t]%n %m%n</pattern>
+            </PatternLayout>
+            <TimeBasedTriggeringPolicy interval="1"/>
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+        </RollingFile>
+
+        <RollingFile name="SendMailDailyFile" fileName="${sys:de.uplanet.lucy.logPath}/sendmail.log" filePattern="${sys:de.uplanet.lucy.logPath}/sendmail.log.%d{yyyy-MM-dd}">
+            <PatternLayout>
+                <pattern>%-5p %d{ISO8601}{UTC}Z - %c[%t]%n %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                 <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+        </RollingFile>
+
+        <!-- logging for the BIA-SAP connector -->
+        <RollingFile name="SapDailyFile" fileName="${sys:de.uplanet.lucy.logPath}/sapapi.log" filePattern="${sys:de.uplanet.lucy.logPath}/sapapi.log.%d{yyyy-MM-dd}">
+            <PatternLayout>
+                <pattern>%-5p %d{ISO8601}{UTC}Z - %c[%t]%n %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+        </RollingFile>
+
+        <!-- logging for the data grid -->
+        <RollingFile name="DataGridDailyFile" fileName="${sys:de.uplanet.lucy.logPath}/datagrid.log" filePattern="${sys:de.uplanet.lucy.logPath}/datagrid.log.%d{yyyy-MM-dd}">
+            <PatternLayout>
+                <pattern>%-5p %d{ISO8601}{UTC}Z - %c[%t]%n %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+        </RollingFile>
+
+        <!-- logging for the saxon grid, remove on release -->
+        <RollingFile name="SaxonTestLog" fileName="${sys:de.uplanet.lucy.logPath}/saxon.log" filePattern="${sys:de.uplanet.lucy.logPath}/saxon.log.%d{yyyy-MM-dd}">
+            <PatternLayout>
+                <pattern>%-5p %d{ISO8601}{UTC}Z - %c[%t]%n %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+            </Policies>
+            <ThresholdFilter level="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <!-- Set root logger level -->
+        <Root level="WARN">
+            <AppenderRef ref="DailyFile"/>
+            <AppenderRef ref="Console"/>
+        </Root>
+
+        <!-- Set the Intrexx logging level -->
+        <Logger name="de.uplanet" level="info" additivity="false">
+            <AppenderRef ref="DailyFile"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- logging for JDBC -->
+        <Logger name="de.uplanet.jdbc" level="info" additivity="false">
+            <AppenderRef ref="DailyFile"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- logging for Velocity -->
+        <Logger name="de.uplanet.lucy.server.scripting.velocity.VelocityLogger" level="warn" additivity="false">
+            <AppenderRef ref="DailyFile"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- logging for JacORB -->
+        <Logger name="jacorb.config" level="error" additivity="false">
+            <AppenderRef ref="DailyFile"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- logging for OData consumer -->
+        <Logger name="de.uplanet.lucy.server.odata.consumer" level="info" additivity="false">
+            <AppenderRef ref="DailyFile"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- logging for OData producer -->
+        <Logger name="de.uplanet.lucy.server.odata.producer" level="info" additivity="false">
+            <AppenderRef ref="DailyFile"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- logging for M-Files -->
+        <Logger name="de.uplanet.lucy.server.mfiles.connector" level="info" additivity="false">
+            <AppenderRef ref="DailyFile"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- Workflow related loggers -->
+        <Logger name="de.uplanet.lucy.server.workflow" level="info" additivity="false">
+            <AppenderRef ref="WorkflowDailyFile"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="de.uplanet.lucy.server.mailservice.workflow" level="info" additivity="false">
+            <AppenderRef ref="WorkflowDailyFile"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="de.uplanet.lucy.server.jms.workflow" level="info" additivity="false">
+            <AppenderRef ref="WorkflowDailyFile"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="de.uplanet.lucy.server.mqtt.workflow" level="info" additivity="false">
+            <AppenderRef ref="WorkflowDailyFile"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="de.uplanet.lucy.server.sick.workflow" level="info" additivity="false">
+            <AppenderRef ref="WorkflowDailyFile"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="de.uplanet.lucy.server.report.workflow" level="info" additivity="false">
+            <AppenderRef ref="WorkflowDailyFile"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="de.uplanet.lucy.server.share.workflow" level="info" additivity="false">
+            <AppenderRef ref="WorkflowDailyFile"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="de.uplanet.lucy.server.saxon" level="info" additivity="false">
+            <AppenderRef ref="SaxonTestLog"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <!-- Set SAP Business Adapter 3.0 Logging Level -->
+        <Logger name="net.initall" level="info" additivity="false">
+            <AppenderRef ref="SapDailyFile"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+
+        <Logger name="org.apache.ignite" level="info" additivity="false">
+            <AppenderRef ref="DataGridDailyFile"/>
+            <AppenderRef ref="Console"/>
+        </Logger>
+    </Loggers>
+</Configuration>

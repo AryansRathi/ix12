@@ -1,0 +1,32 @@
+---
+supervisor:
+  name: ""
+  host: ""
+  port: null
+  scheme: ""
+  credentials:
+    username: ""
+    password: ""
+portals:
+- name: "${PORTAL_NAME}"
+  host: "${PORTAL_HOST}"
+  port: ${PORTAL_API_PORT}
+  scheme: "${PORTAL_API_SCHEME}"
+  credentials:
+    username: "${PORTAL_ADMIN_USER}"
+    password: "${PORTAL_ADMIN_PW}"
+credentials:
+  username: "${IAA_USER}"
+  password: "${IAA_PW}"
+environment:
+  sudoPassword: null
+  host: "0.0.0.0"
+  port: 4242
+  keystore: "admin-api/cfg/cacerts"
+  keystorePassword: "${CACERTS_PW}"
+  secret: "${IAA_SECRET}"
+  portalManagementBySupervisor: false
+debugMode: ${IAA_DEBUG_MODE}
+maxAuthRequestPerIP: 50
+https: ${IAA_USE_SSL}
+license: "${IAA_LICENSE}"
