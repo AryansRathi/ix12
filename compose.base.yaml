@@ -1,0 +1,133 @@
+services:
+  db:
+    image: postgres:${PG_VERSION}
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_USER: ${PG_USER}
+    volumes:
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PG_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Manages the Solr nodes and is used to connect to them
+  zookeeper:
+    image: zookeeper:${ZOOKEEPER_VERSION}
+    restart: unless-stopped
+    environment:
+      ZOO_4LW_COMMANDS_WHITELIST: mntr, conf, ruok
+    volumes:
+      - zookeeper-data:/data
+      - zookeeper-datalog:/datalog
+
+  # Uploads the security.json to the zookeeper - there is actually no other way to do this
+  solr-init:
+    image: solr:${SOLR_VERSION}
+    restart: no
+    depends_on: &solr-depends
+      zookeeper:
+        condition: service_started
+    environment: &solr-env
+      SOLR_OPTS: ${SOLR_OPTS}
+      ZK_HOST: zookeeper:2181
+    command: bash -c "bin/solr zk cp -z zookeeper:2181 file:/tmp/security.json zk:/security.json"
+    volumes:
+     # security.json is world-readable --> secure?
+     - ./runtime/zookeeper/security.json:/tmp/security.json:ro
+
+  # A solr node in the "cluster"
+  solr:
+    image: solr:${SOLR_VERSION}
+    restart: unless-stopped
+    depends_on:
+      <<: *solr-depends
+      solr-init:
+        condition: service_completed_successfully
+    environment: *solr-env
+    command: -c
+    volumes:
+     - solr-data:/var/solr
+
+  # Creates or patches the portal
+  intrexx-init:
+    image: intrexx:${IX_VERSION}-${INTREXX_TARGET:-rootful}
+    pull_policy: never
+    restart: no
+    depends_on: &intrexx-depends
+      db:
+        condition: service_healthy
+      solr:
+        condition: service_started
+      zookeeper:
+        condition: service_started
+    environment: &intrexx-env
+      DB_HOST: db
+      DB_PORT: 5432
+      SOLR_HOST: zookeeper
+      SOLR_PORT: 2181
+      SOLR_USER: ${SOLR_USER}
+      SOLR_PASSWORD: ${SOLR_PASSWORD}
+      SOLR_SASL_DISABLED: "true"
+      SOLR_PATH: ${SOLR_PATH}
+      PORTAL_NAME: ${IX_PORTAL_NAME}
+      PORTAL_BASE_URL: ${IX_PORTAL_BASE_URL}
+      PORTAL_ZIP_NAME: ${IX_PORTAL_ZIP_NAME:-portal-template.zip}
+      DB_NAME: ${IX_DB_NAME}
+      DB_CREATE: ${IX_DB_CREATE:-true}
+      DB_USER: ${PG_USER}
+      DB_PASSWORD: ${PG_PASSWORD}
+    command: "echo done"
+    volumes:
+      - portal-data:/opt/intrexx/org
+      - intrexx-cfg:/opt/intrexx/cfg
+      - ./runtime/intrexx/import:/tmp/import:ro
+
+  # The Intrexx instance that runs the portal
+  intrexx:
+    image: intrexx:${IX_VERSION}-${INTREXX_TARGET:-rootful}
+    pull_policy: never
+    build:
+      context: .
+      dockerfile: docker/intrexx/Dockerfile
+      pull: true
+      target: ${INTREXX_TARGET:-rootful}
+      args:
+        IX_VERSION: ${IX_VERSION}
+        INSTALL_IMAGEMAGICK: ${INSTALL_IMAGEMAGICK:-true}
+        INSTALL_LIBREOFFICE: ${INSTALL_LIBREOFFICE:-false}
+        USER_UID: ${INTREXX_USER_UID:-1000}
+        USER_GID: ${INTREXX_USER_GID:-1000}
+    restart: unless-stopped
+    deploy:
+      mode: ${IX_DEPLOY_MODE:-global}
+      replicas: ${IX_DEPLOY_REPLICATIONS:-1}
+    depends_on:
+      <<: *intrexx-depends
+      intrexx-init:
+        condition: service_completed_successfully
+    environment:
+      <<: *intrexx-env
+    ports:
+      - "${IX_WEBCONNECTOR_HOST_PORT}:1337"
+      - "${IX_REST_HOST_PORT}:8101"
+      - "${IX_ODATA_HOST_PORT}:9090"
+    volumes:
+      - portal-data:/opt/intrexx/org
+      - intrexx-cfg:/opt/intrexx/cfg
+
+    healthcheck:
+      test: ["CMD-SHELL", "bash -ec 'exec 3<>/dev/tcp/127.0.0.1/1337; printf \"GET /service/ping/ HTTP/1.1\r\nHost: localhost\r\nConnection: close\r\n\r\n\" >&3; IFS= read -r status <&3; case \"$$status\" in \"HTTP/1.1 200\"*) exit 0;; *) exit 1;; esac'"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+
+volumes:
+  portal-data:
+  db-data:
+  zookeeper-data:
+  zookeeper-datalog:
+  solr-data:
+  intrexx-cfg:

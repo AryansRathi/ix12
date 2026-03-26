@@ -1,0 +1,24 @@
+volumes:
+  portal-data:
+    external: true
+    name: intrexx-in-docker_portal-data
+
+  db-data:
+    external: true
+    name: intrexx-in-docker_intrexx-db-data
+
+  zookeeper-data:
+    external: true
+    name: intrexx-in-docker_intrexx-zookeeper-data
+
+  zookeeper-datalog:
+    external: true
+    name: intrexx-in-docker_intrexx-zookeeper-datalog
+
+  solr-data:
+    external: true
+    name: intrexx-in-docker_intrexx-solr-data
+
+  intrexx-cfg:
+    external: true
+    name: intrexx-in-docker_intrexx-cfg
