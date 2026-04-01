@@ -1,0 +1,11 @@
+services:
+  intrexx-init:
+    volumes:
+      - ${IX_PORTAL_DIR_HOST}:/opt/intrexx/org
+      - intrexx-cfg:/opt/intrexx/cfg
+      - ./runtime/intrexx/import:/tmp/import:ro
+
+  intrexx:
+    volumes:
+      - ${IX_PORTAL_DIR_HOST}:/opt/intrexx/org
+      - intrexx-cfg:/opt/intrexx/cfg

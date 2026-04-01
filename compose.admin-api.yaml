@@ -1,0 +1,39 @@
+services:
+  admin-api:
+    image: intrexx-admin-api:${IX_VERSION}-${ADMIN_API_TARGET:-rootful}
+    build:
+      context: .
+      dockerfile: docker/admin-api/Dockerfile
+      pull: true
+      target: ${ADMIN_API_TARGET:-rootful}
+      args:
+        USER_UID: ${ADMIN_API_USER_UID:-1000}
+        USER_GID: ${ADMIN_API_USER_GID:-1000}
+    restart: unless-stopped
+    depends_on:
+      intrexx:
+        condition: service_healthy
+    environment:
+      PORTAL_NAME: ${PORTAL_NAME:-$IX_PORTAL_NAME}
+      PORTAL_HOST: ${PORTAL_HOST:-intrexx}
+      PORTAL_API_PORT: ${PORTAL_API_PORT}
+      PORTAL_API_SCHEME: ${PORTAL_API_SCHEME:-https}
+      PORTAL_ADMIN_USER: ${PORTAL_ADMIN_USER:-Administrator}
+      PORTAL_ADMIN_PW: ${PORTAL_ADMIN_PW:-NONE}
+      IAA_USER: ${IAA_USER:-iaa-admin}
+      IAA_PW: ${IAA_PW:-P4$$$$w0rD}
+      IAA_DEBUG_MODE: ${IAA_DEBUG_MODE:-false}
+      CACERTS_FILE: ${CUSTOM_CACERTS_FILE:-cacerts}
+      CACERTS_PW: ${CUSTOM_CACERTS_PW:-changeit}
+      CACERTS_SAN_LIST: ${CACERTS_SAN_LIST:-}
+      IAA_SECRET: ${IAA_SECRET:-changeit}
+      IAA_USE_SSL: ${IAA_USE_SSL:-true}
+      IAA_LICENSE: ${IAA_LICENSE:-NONE}
+    ports:
+      - "${ADMIN_API_HOST_PORT}:4242"
+    volumes:
+      - admin-api-cfg:/opt/intrexx/admin-api/cfg
+      - ./runtime/admin-api/cfg:/tmp/admin-api/cfg
+
+volumes:
+  admin-api-cfg:

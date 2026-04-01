@@ -1,0 +1,41 @@
+services:
+  intrexx-init:
+    environment: &intrexx-cluster-env
+      IX_DISTRIBUTED: "true"
+      IX_DISTRIBUTED_NODELIST: ${IX_DISTRIBUTED_NODELIST}
+      TOMCAT_SEC_HEADER_XACCOUNTNAME: "allow"
+      TOMCAT_SEC_HEADER_XFORWARDEDFOR: "allow"
+      TOMCAT_SEC_HEADER_FORWARDED: "allow"
+      TOMCAT_SEC_HEADER_XREALIP: "allow"
+      TOMCAT_SEC_HEADER_XFORWARDEDHOST: "allow"
+      TOMCAT_SEC_HEADER_XFORWARDEDPROTO: "allow"
+      TOMCAT_SEC_HEADER_XORIGINALURL: "allow"
+      TOMCAT_SEC_HEADER_RECEIVEONNONLOOPBACKINTERFACE: "true"
+
+  intrexx:
+    environment:
+      <<: *intrexx-cluster-env
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.intrexx-ix12-intrexx-in-docker.rule=Host(`ix12-intrexx-in-docker.localhost`)"
+      - "traefik.http.routers.intrexx-ix12-intrexx-in-docker.entrypoints=web"
+      - "traefik.http.routers.intrexx-ix12-intrexx-in-docker.service=intrexx-ix12-intrexx-in-docker"
+        #      - "traefik.http.services.intrexx.loadbalancer.server.port=5000"
+
+  reverse-proxy:
+    # The official v2 Traefik docker image
+    image: traefik:${TRAEFIK_VERSION}
+    depends_on:
+      db:
+        condition: service_healthy
+    # Enables the web UI and tells Traefik to listen to docker
+    command: --api.insecure=true --providers.docker
+    ports:
+      # The HTTP port
+      - "1337:1337"
+      # The Web UI (enabled by --api.insecure=true)
+      - "8080:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./runtime/traefik/traefik.yml:/etc/traefik/traefik.yml

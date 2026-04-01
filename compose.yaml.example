@@ -1,0 +1,7 @@
+include:
+  - path:
+      - compose.base.yaml
+      # - compose.bind.yaml
+      # - compose.admin-api.yaml
+      # - compose.distributed.yaml
+      # - compose.migration.yaml

@@ -1,0 +1,12 @@
+/.git
+/.gitignore
+/.env
+/.env.example
+
+runtime/
+
+.idea
+.vscode
+.swp
+
+.gitkeep
