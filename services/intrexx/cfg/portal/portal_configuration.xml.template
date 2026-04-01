@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<portal xmlns="http://schemas.unitedplanet.de/intrexx/2012/portal/builder"
+		path="/opt/intrexx/org/${PORTAL_NAME}"
+		name="${PORTAL_NAME}">
+
+	<template path="${TEMPLATE_PATH}"/>
+
+	<database type="postgresql"
+			  timezone="UTC"
+			  hostName="${DB_HOST}"
+			  port="${DB_PORT}"
+			  ssl="DISABLED"
+			  databaseName="${DB_NAME}"
+			  adminLogin="${DB_USER}"
+			  adminPassword="${DB_PASSWORD}"
+			  create="${DB_CREATE}"
+			  userLogin="${DB_USER}"
+			  userPassword="${DB_PASSWORD}"
+			  characterSet="UTF8"
+			  driverIndex="0"/>
+	<connectorRest bindAddress="0.0.0.0" port="8101"/>
+
+	<connectorWeb
+			hostName="localhost"
+			port="1337"
+			baseDirectory="internal/tmp"
+			appBaseDirectory="localhost/appbase"
+			docBaseDirectory="external/htmlroot"
+			xmlBaseDirectory="localhost/xmlbase"
+			defaultWebXml="tomcat/conf/web.xml"/>
+
+	<search class="de.uplanet.lucy.search.solr.SolrPortalManagerConfiguration">
+		<property name="de.uplanet.lucy.solr.authenticationType"
+				  value="basic">
+		</property>
+
+		<property name="de.uplanet.lucy.solr.user"
+				  value="${SOLR_USER}">
+		</property>
+
+		<property name="de.uplanet.lucy.solr.password"
+				  value="${SOLR_PASSWORD}">
+		</property>
+
+		<property name="de.uplanet.lucy.solr.serverType"
+				  value="cloud">
+		</property>
+
+		<property name="de.uplanet.lucy.solr.url"
+				  value="${SOLR_HOST}:${SOLR_PORT}/${SOLR_PATH}">
+		</property>
+	</search>
+
+	<uris>
+		<uri name="web.url.base.default" value="${PORTAL_BASE_URL}"/>
+	</uris>
+
+</portal>
